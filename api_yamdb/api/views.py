@@ -1,7 +1,6 @@
 from rest_framework import status
 
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,9 +8,11 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import AllowAny
 
 from .serializers import User, AuthSerializer
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 
 from reviews import models
+from . import serializers
 
 
 class AuthAPIView(APIView):
@@ -32,15 +33,4 @@ class AuthAPIView(APIView):
         user = serializer.save()
         self.send_token(user)
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
-
-
-# class MyTokenObtainPair(TokenObtainPairView):
-#     serializer_class = TokenObtainPairSerializer
-#
-#     def get_tokens_for_user(user):
-#         access = AccessToken.for_user(user)
-#
-#         return {
-#             'token': str(access)
-#         }
 
