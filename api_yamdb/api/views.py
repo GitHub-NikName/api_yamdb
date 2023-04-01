@@ -31,7 +31,7 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    # queryset = 
+    queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
     # permission_classes =  # добавить пермишен
