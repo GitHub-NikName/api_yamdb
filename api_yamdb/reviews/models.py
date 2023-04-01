@@ -1,5 +1,7 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+from .managers import UserManager
 
 
 CHOICES = (
@@ -7,33 +9,6 @@ CHOICES = (
     ('moderator', 'Модератор'),
     ('admin', 'Админ')
 )
-
-
-class UserManager(BaseUserManager):
-    """
-    Менеджер для модели пользователя.
-    """
-
-    def create_user(self, username, email):
-        """ Создает и возвращает пользователя с имэйлом, паролем и именем. """
-        if username is None:
-            raise TypeError('Users must have a username.')
-        if email is None:
-            raise TypeError('Users must have an email address.')
-
-        user = self.model(username=username, email=self.normalize_email(email))
-        user.save()
-        return user
-
-    def create_superuser(self, username, email, password):
-        """ Создает и возввращет пользователя с привилегиями суперадмина. """
-        if password is None:
-            raise TypeError('Superusers must have a password.')
-        user = self.create_user(username, email, password)
-        user.is_superuser = True
-        user.is_staff = True
-        user.save()
-        return user
 
 
 class User(AbstractUser):
@@ -57,3 +32,12 @@ class User(AbstractUser):
         choices=CHOICES,
         default='user'
     )
+
+    objects = UserManager()
+
+    # class Meta:
+    #     verbose_name = 'Пользователь'
+    #     verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
