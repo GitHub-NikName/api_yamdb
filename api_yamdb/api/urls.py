@@ -4,6 +4,7 @@ from django.urls import include, path
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .views import (CategoriesViewSet, GenreViewSet, TitlesViewSet, AuthAPIView)
+from .serializers import TokenAuthSerializer
 
 app_name = 'api'
 
@@ -17,7 +18,8 @@ v1_router.register('titles', TitlesViewSet, basename='titles')
 urlpatterns = [
     path('', include(v1_router.urls)),
     path('auth/signup/', AuthAPIView.as_view(), name='signup'),
-    # path('auth/token/', views.UserLoginAPIView.as_view(), name='token_obtain_pair'),
-
+    path('auth/token/',
+         TokenObtainPairView.as_view(serializer_class=TokenAuthSerializer),
+         name='token_obtain_pair'),
 ]
 

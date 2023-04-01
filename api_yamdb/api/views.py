@@ -1,30 +1,18 @@
-
 from rest_framework import status
 
 from django.contrib.auth.tokens import default_token_generator
-
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import AllowAny
-
-from .serializers import User, AuthSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
-
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, views
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
-
 from reviews.models import Category, Genre, Title
 from api.serializers import (CategoriesSerializer, GenreSerializer,
-                             TitlesWriteSerializer, TitlesReadSerializer)
+                             TitlesWriteSerializer, TitlesReadSerializer,
+                             AuthSerializer, User)
 
 from api.filters import TitlesFilter
-from . import serializers
-from reviews import models
-
 
 
 class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -60,7 +48,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
         return TitlesReadSerializer
 
 
-class AuthAPIView(APIView):
+class AuthAPIView(views.APIView):
     """
      Регистрация и отправка кода подтверждения.
     """
