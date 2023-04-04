@@ -7,6 +7,5 @@ services:
         command: python api_yamdb/manage.py runserver 0.0.0.0:8000
         volumes:
             - .:/opt/project
-#            - ../tests/opt
         ports:
             - "8000:8000"

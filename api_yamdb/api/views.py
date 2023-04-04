@@ -1,18 +1,18 @@
 from rest_framework import status
-
-from django.contrib.auth.tokens import default_token_generator
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework import mixins, viewsets, views
-from rest_framework import filters
+from rest_framework import mixins, viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action, api_view, permission_classes
 
-from reviews.models import Category, Genre, Title
-from api.serializers import (CategoriesSerializer, GenreSerializer,
-                             TitlesWriteSerializer, TitlesReadSerializer,
-                             AuthSerializer, User)
-
-from api.filters import TitlesFilter
+from reviews.models import Category, Genre, Title, User
+from .serializers import (
+    CategoriesSerializer, GenreSerializer, TitlesWriteSerializer,
+    TitlesReadSerializer, SignUpSerializer, UserSerializer, ProfileSerializer
+)
+from .filters import TitlesFilter, UserFilter
+from .permissions import IsUser, IsModerator, IsAdmin, IsOwner, RolePermissions
+from .utils import send_token
 
 
 class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -22,7 +22,6 @@ class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
-    # permission_classes =  # добавить пермишен
 
 
 class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -32,14 +31,12 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
-    # permission_classes =  # добавить пермишен
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
-    # permission_classes =  # добавить пермишен
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
@@ -48,23 +45,35 @@ class TitlesViewSet(viewsets.ModelViewSet):
         return TitlesReadSerializer
 
 
-class AuthAPIView(views.APIView):
-    """
-     Регистрация и отправка кода подтверждения.
-    """
-    permission_classes = (AllowAny,)
-    serializer_class = AuthSerializer
-
-    def send_token(self, user):
-        confirmation_code = default_token_generator.make_token(user)
-        user.email_user('yamdb', f'confirmation_code: {confirmation_code}')
-
-    def post(self, request):
-        user = User.objects.filter(**request.data).first() or None
-        serializer = self.serializer_class(user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        self.send_token(user)
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def signup(request):
+    serializer = SignUpSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user, _ = User.objects.get_or_create(**serializer.validated_data)
+    send_token(user)
+    return Response(serializer.data)
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+    filter_backends = [DjangoFilterBackend,]
+    filterset_class = UserFilter
+    permission_classes = [IsAdmin, ]
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    @action(methods=['patch', 'get'], detail=False,
+            permission_classes=[RolePermissions],
+            url_path='me', url_name='me',
+            serializer_class=ProfileSerializer)
+    def me(self, request, *args, **kwargs):
+        user = self.request.user
+        serializer = self.get_serializer(user)
+        if self.request.method == 'PATCH':
+            serializer = self.get_serializer(
+                user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
