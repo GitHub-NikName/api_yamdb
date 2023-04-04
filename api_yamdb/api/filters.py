@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from reviews.models import Title
+from reviews.models import Title, User
 
 
 class TitlesFilter(filters.FilterSet):
@@ -14,3 +14,13 @@ class TitlesFilter(filters.FilterSet):
     class Meta:
         model = Title
         fields = '__all__'
+
+
+class UserFilter(filters.FilterSet):
+    search = filters.CharFilter(
+        field_name='username', lookup_expr='exact'
+    )
+
+    class Meta:
+        model = User
+        fields = ('username',)

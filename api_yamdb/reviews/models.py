@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from reviews.valitadors import validate_year
-from .managers import UserManager
 
 
 CHOICES = (
@@ -83,7 +82,7 @@ class User(AbstractUser):
         db_index=True,
         error_messages={
             'unique':
-                "Пользователь с таким адресом электронной почты уже существует"
+                'Пользователь с таким адресом электронной почты уже существует'
         },
     )
     bio = models.TextField(
@@ -95,11 +94,19 @@ class User(AbstractUser):
         'Роль пользователя',
         max_length=16,
         choices=CHOICES,
-        default='user'
+        default='user',
     )
-
-    objects = UserManager()
 
     def __str__(self):
         return self.username
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(username__iexact="me"),
+                name="username_is_not_me"
+            )
+        ]
 
