@@ -1,20 +1,6 @@
 from rest_framework import permissions
 
 
-class IsOwner(permissions.BasePermission):
-    """
-    Custom permission to only allow owners of an object to edit it.
-    """
-    message = 'Изменение чужого контента запрещено!'
-
-    def has_object_permission(self, request, view, obj):
-        return bool(
-            request.method in permissions.SAFE_METHODS
-            or obj.username == request.user
-        )
-# TODO isowner удалить если не нужен
-
-
 class RolePermissions(permissions.BasePermission):
     allowed_roles = ('user', 'moderator', 'admin')
 
@@ -54,4 +40,22 @@ class IsAdminOrReadOnly(IsAdmin):
                 request.user.role in self.allowed_roles
                 or request.user.is_staff
                 )
+        )
+
+
+class IsOwnerModeratorAdminOrReadOnly(permissions.BasePermission):
+    allowed_roles = ('moderator', 'admin')
+
+    def has_permission(self, request, view):
+        return bool(
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return bool(
+            request.method in permissions.SAFE_METHODS
+            or obj.author == request.user
+            or request.user.is_authenticated
+            and request.user.role in self.allowed_roles
         )
