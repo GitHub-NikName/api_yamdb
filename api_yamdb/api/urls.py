@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .views import (CategoriesViewSet, GenreViewSet, TitlesViewSet,
-                    UserViewSet, signup, ReviewVieSet)
+                    UserViewSet, signup, ReviewVieSet, CommentViewSet)
 from .serializers import TokenAuthSerializer
 
 app_name = 'api'
@@ -16,6 +16,11 @@ v1_router.register('titles', TitlesViewSet, basename='titles')
 v1_router.register(r'users', UserViewSet, basename='users')
 v1_router.register(r'titles/(?P<title_id>\d+)/reviews', ReviewVieSet,
                    basename='review')
+v1_router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet,
+    basename='comment'
+)
 
 
 urlpatterns = [
@@ -25,4 +30,3 @@ urlpatterns = [
          TokenObtainPairView.as_view(serializer_class=TokenAuthSerializer),
          name='token_obtain_pair'),
 ]
-

@@ -11,9 +11,6 @@ User = get_user_model()
 
 class Command(BaseCommand):
     help = 'load data from csv'
-    # data = {
-    #     User: 'users',
-    # } #  TODO доделать для всех файлов
 
     def handle(self, *args, **options):
         csv_file = 'static/data/users.csv'

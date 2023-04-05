@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Title, Review, Comment
 from .utils import get_jwt_for_user
 
 
@@ -29,6 +29,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitlesWriteSerializer(serializers.ModelSerializer):
+    """Произведения. Для записи"""
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug', many=True
@@ -46,6 +47,7 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
 
 
 class TitlesReadSerializer(serializers.ModelSerializer):
+    """Произведения. Для чтения"""
     rating = serializers.IntegerField(
         source='reviews__score__avg',
         read_only=True,
@@ -117,7 +119,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    """Для пользователей"""
+    """Профиль пользователея"""
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
@@ -127,7 +129,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Отзывы"""
-
     author = serializers.SlugRelatedField(
         slug_field='username',
         default=serializers.CurrentUserDefault(),
@@ -147,3 +148,16 @@ class ReviewSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'На каждое произведение можно оставить только один отзыв')
         return attrs
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Комментарии"""
+    review = serializers.HiddenField(default=54)
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date', 'review')
