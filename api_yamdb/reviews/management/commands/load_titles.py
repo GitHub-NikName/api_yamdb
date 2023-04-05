@@ -18,10 +18,6 @@ class Command(BaseCommand):
 
         with open(csv_file, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f, delimiter=',')
-            cnt = {'all': 0, 'new': 0}
             for row in reader:
-                user, created = Title.objects.update_or_create(**row)
-                cnt['all'] += 1
-                if created:
-                    cnt['new'] += 1
-        print('всего: {all}, добавлено в бд: {new}'.format(**cnt))
+                user, _ = Title.objects.update_or_create(**row)
+        print('Ок')
