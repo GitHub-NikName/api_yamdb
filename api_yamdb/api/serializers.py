@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 from .utils import get_jwt_for_user
 
 
@@ -46,7 +46,11 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
 
 
 class TitlesReadSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.IntegerField(
+        source='reviews__score__avg',
+        read_only=True,
+        default=None
+    )
     genre = GenreSerializer(many=True, read_only=True)
     category = CategoriesSerializer(read_only=True)
 
@@ -59,8 +63,11 @@ class TitlesReadSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.Serializer):
-    """Сериализация регистрации пользователя."""
-    email = serializers.EmailField(max_length=254, required=True)
+    """Сериализация регистрации и авторизации пользователя."""
+    email = serializers.EmailField(
+        max_length=254,
+        required=True
+    )
     username = serializers.RegexField(
         r'^[\w.@+-]+$',
         max_length=150,
@@ -87,6 +94,7 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class TokenAuthSerializer(serializers.Serializer):
+    """JWT токен"""
     username = serializers.RegexField(r'^[\w.@+-]+$', max_length=150)
     confirmation_code = serializers.CharField(max_length=100)
 
@@ -100,7 +108,7 @@ class TokenAuthSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    """Для админа"""
     class Meta:
         model = User
         fields = (
@@ -109,9 +117,33 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-
+    """Для пользователей"""
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
         read_only_fields = ('role', )
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    """Отзывы"""
+
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+        read_only=True
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+    def validate(self, attrs):
+        request = self.context['request']
+        title_id = self.context['view'].kwargs['title_id']
+        author = request.user
+        if request.method == 'POST':
+            if Review.objects.filter(title=title_id, author=author).exists():
+                raise serializers.ValidationError(
+                    'На каждое произведение можно оставить только один отзыв')
+        return attrs
