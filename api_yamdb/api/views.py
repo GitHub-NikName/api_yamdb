@@ -8,19 +8,19 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 
 from reviews.models import Category, Genre, Title, User, Review
-from .serializers import (
-    CategoriesSerializer, GenreSerializer, TitlesWriteSerializer,
-    TitlesReadSerializer, SignUpSerializer, UserSerializer, ProfileSerializer,
-    ReviewSerializer
-)
+from .serializers import (CategoriesSerializer, GenreSerializer,
+                          TitlesWriteSerializer, TitlesReadSerializer,
+                          SignUpSerializer, UserSerializer, ProfileSerializer,
+                          ReviewSerializer, CommentSerializer)
 
 from .filters import TitlesFilter, UserFilter
-from .permissions import IsUser, IsModerator, IsAdmin, IsOwnerModeratorAdminOrReadOnly, RolePermissions
+from .permissions import IsAdmin, IsOwnerModerAdminOrReadOnly, RolePermissions
 from .utils import send_token
 
 
 class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                         mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """Категории"""
     queryset = Category.objects.all()
     serializer_class = CategoriesSerializer
     lookup_field = 'slug'
@@ -30,6 +30,7 @@ class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                    mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """Жанры"""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = 'slug'
@@ -38,6 +39,7 @@ class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
+    """Произведения"""
     queryset = Title.objects.all().annotate(
         Avg('reviews__score'))
     filter_backends = (DjangoFilterBackend,)
@@ -52,6 +54,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def signup(request):
+    """Регистрация и авторизация"""
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user, _ = User.objects.get_or_create(**serializer.validated_data)
@@ -74,6 +77,7 @@ class UserViewSet(viewsets.ModelViewSet):
             url_path='me', url_name='me',
             serializer_class=ProfileSerializer)
     def me(self, request, *args, **kwargs):
+        """Профиль пользователя"""
         user = self.request.user
         serializer = self.get_serializer(user)
         if self.request.method == 'PATCH':
@@ -87,7 +91,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ReviewVieSet(viewsets.ModelViewSet):
     """Отзывы"""
     serializer_class = ReviewSerializer
-    permission_classes = [IsOwnerModeratorAdminOrReadOnly]
+    permission_classes = [IsOwnerModerAdminOrReadOnly]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
@@ -97,3 +101,18 @@ class ReviewVieSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """Комментарии к отзывам"""
+    serializer_class = CommentSerializer
+    permission_classes = [IsOwnerModerAdminOrReadOnly]
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        serializer.save(author=self.request.user, review=review)

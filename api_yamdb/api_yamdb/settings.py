@@ -125,10 +125,9 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'reviews.User'
 
 SIMPLE_JWT = {
-'TOKEN_OBTAIN_SERIALIZER': 'api.serializers.MyTokenObtainPairSerializer',
-   'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
-   'AUTH_HEADER_TYPES': ('Bearer',),
-
+    'TOKEN_OBTAIN_SERIALIZER': 'api.serializers.MyTokenObtainPairSerializer',
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=10),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

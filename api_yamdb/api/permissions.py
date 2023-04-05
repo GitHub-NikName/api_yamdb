@@ -11,12 +11,12 @@ class RolePermissions(permissions.BasePermission):
         )
 
 
-class IsUser(RolePermissions):
-    allowed_roles = ('user', )
-
-
-class IsModerator(RolePermissions):
-    allowed_roles = ('moderator', )
+# class IsUser(RolePermissions):
+#     allowed_roles = ('user', )
+#
+#
+# class IsModerator(RolePermissions):
+#     allowed_roles = ('moderator', )
 
 
 class IsAdmin(RolePermissions):
@@ -39,11 +39,14 @@ class IsAdminOrReadOnly(IsAdmin):
             and (
                 request.user.role in self.allowed_roles
                 or request.user.is_staff
-                )
+            )
         )
 
 
-class IsOwnerModeratorAdminOrReadOnly(permissions.BasePermission):
+class IsOwnerModerAdminOrReadOnly(permissions.BasePermission):
+    """ + для автора, модератора, админа или только чтение,
+    + пост метод для аторизированных пользователей"""
+
     allowed_roles = ('moderator', 'admin')
 
     def has_permission(self, request, view):

@@ -22,7 +22,7 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-    def str(self):
+    def __str__(self):
         return self.slug
 
 
@@ -36,7 +36,7 @@ class Genre(models.Model):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
-    def str(self):
+    def __str__(self):
         return self.slug
 
 
@@ -60,7 +60,7 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
-    def str(self):
+    def __str__(self):
         return self.name
 
 
@@ -72,7 +72,7 @@ class GenreTitle(models.Model):
                               on_delete=models.CASCADE,
                               verbose_name='Название')
 
-    def str(self):
+    def __str__(self):
         return f'{self.genre} {self.title}'
 
 
@@ -98,9 +98,6 @@ class User(AbstractUser):
         default='user',
     )
 
-    def __str__(self):
-        return self.username
-
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
@@ -110,6 +107,9 @@ class User(AbstractUser):
                 name="username_is_not_me"
             )
         ]
+
+    def __str__(self):
+        return self.username
 
 
 class Review(models.Model):
@@ -149,3 +149,34 @@ class Review(models.Model):
             ),
         ]
 
+    def __str__(self):
+        return self.text
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        verbose_name='Отзыв',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    author = models.ForeignKey(
+        User,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text
