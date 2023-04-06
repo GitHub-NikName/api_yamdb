@@ -16,7 +16,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('name', 'slug')
+        fields = '__all__'
         lookup_field = 'slug'
 
 
@@ -24,7 +24,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('name', 'slug')
+        fields = '__all__'
         lookup_field = 'slug'
 
 
@@ -41,9 +41,7 @@ class TitlesWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name',
-                  'year', 'description',
-                  'genre', 'category')
+        fields = '__all__'
 
 
 class TitlesReadSerializer(serializers.ModelSerializer):
@@ -58,10 +56,7 @@ class TitlesReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name',
-                  'year', 'rating',
-                  'description', 'genre',
-                  'category')
+        fields = '__all__'
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -113,16 +108,13 @@ class UserSerializer(serializers.ModelSerializer):
     """Для админа"""
     class Meta:
         model = User
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
-        )
+        fields = '__all__'
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Профиль пользователея"""
     class Meta:
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'bio', 'role')
+        fields = '__all__'
         model = User
         read_only_fields = ('role', )
 
@@ -137,7 +129,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = '__all__'
 
     def validate(self, attrs):
         request = self.context['request']
@@ -160,4 +152,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'pub_date', 'review')
+        fields = '__all__'
