@@ -16,7 +16,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        exclude = ('id',)
         lookup_field = 'slug'
 
 
@@ -24,7 +24,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        exclude = ('id',)
         lookup_field = 'slug'
 
 
@@ -108,13 +108,15 @@ class UserSerializer(serializers.ModelSerializer):
     """Для админа"""
     class Meta:
         model = User
-        fields = '__all__'
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Профиль пользователея"""
     class Meta:
-        fields = '__all__'
+        exclude = ('is_staff', 'is_active', 'date_joined')
         model = User
         read_only_fields = ('role', )
 
@@ -129,7 +131,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = '__all__'
+        exclude = ('title',)
 
     def validate(self, attrs):
         request = self.context['request']
