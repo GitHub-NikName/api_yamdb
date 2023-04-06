@@ -52,7 +52,7 @@ python manage.py runserver
 #
 ### Загрузить в базу пользователей из static/data/users.csv
 ```bash
-python manage.py load_users
+python manage.py load_csv
 ```
 
 ### Контакты:
