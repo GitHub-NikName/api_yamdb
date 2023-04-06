@@ -18,8 +18,13 @@ from .permissions import IsAdmin, IsOwnerModerAdminOrReadOnly, RolePermissions
 from .utils import send_token
 
 
-class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                        mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class WithoutPatсhPutViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                             mixins.DestroyModelMixin,
+                             viewsets.GenericViewSet):
+    pass
+
+
+class CategoriesViewSet(WithoutPatсhPutViewSet):
     """Категории"""
     queryset = Category.objects.all()
     serializer_class = CategoriesSerializer
@@ -28,8 +33,7 @@ class CategoriesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     search_fields = ('^name',)
 
 
-class GenreViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class GenreViewSet(WithoutPatсhPutViewSet):
     """Жанры"""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer

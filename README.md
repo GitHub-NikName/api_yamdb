@@ -52,7 +52,7 @@ python manage.py runserver
 #
 ### Загрузить в базу пользователей из static/data/users.csv
 ```bash
-python manage.py load_users
+python manage.py load_csv
 ```
 
 ### Контакты:
@@ -60,3 +60,7 @@ python manage.py load_users
 [//]: # (Михаил  )
 [//]: # ([email]&#40;server-15@yandex.ru&#41;  )
 [//]: # ([telegram]&#40;https://t.me/sergeev_mikhail&#41;)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+[//]: # (Барат  )
+[//]: # ([github] https://github.com/Bary-Kayum)
+[//]: # ([telegram]https://t.me/bary_kayum)

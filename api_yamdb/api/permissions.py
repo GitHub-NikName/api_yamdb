@@ -11,14 +11,6 @@ class RolePermissions(permissions.BasePermission):
         )
 
 
-# class IsUser(RolePermissions):
-#     allowed_roles = ('user', )
-#
-#
-# class IsModerator(RolePermissions):
-#     allowed_roles = ('moderator', )
-
-
 class IsAdmin(RolePermissions):
     allowed_roles = ('admin', )
 
